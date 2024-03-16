@@ -12,12 +12,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const fs_1 = __importDefault(require("fs"));
 const puppeteer_1 = __importDefault(require("puppeteer"));
-function timeout(ms) {
-    return __awaiter(this, void 0, void 0, function* () {
-        return new Promise(resolve => setTimeout(resolve, ms));
-    });
-}
 (() => __awaiter(void 0, void 0, void 0, function* () {
     const browser = yield puppeteer_1.default.launch({ headless: true });
     const page = yield browser.newPage();
@@ -32,9 +28,34 @@ function timeout(ms) {
         }
     }));
     yield page.goto("https://www.etsy.com/", {
-        waitUntil: ["load"],
+        waitUntil: "networkidle0",
     });
-    yield timeout(5000);
-    yield page.screenshot({ path: "example.png" });
+    // Starting the product search process
+    const products = yield page.evaluate(() => {
+        const productElements = Array.from(document.querySelectorAll(".v2-listing-card"));
+        // Array for storing products info
+        const products = [];
+        for (let i = 0; i < 10 && i < productElements.length; i++) {
+            const productElement = productElements[i];
+            const titleElement = productElement.querySelector(".v2-listing-card__title");
+            const symbolElement = productElement.querySelector(".currency-symbol");
+            const priceElement = productElement.querySelector(".currency-symbol + .currency-value");
+            const linkElement = productElement.querySelector(".listing-link");
+            // Extraction of title, price and product URL
+            const title = titleElement
+                ? titleElement.textContent && titleElement.textContent.trim()
+                : "";
+            const price = priceElement
+                ? priceElement.textContent &&
+                    priceElement.textContent.trim() + " " + (symbolElement === null || symbolElement === void 0 ? void 0 : symbolElement.textContent)
+                : "";
+            const link = linkElement instanceof HTMLAnchorElement ? linkElement.href : "";
+            products.push({ title, price, link });
+        }
+        return products;
+    });
+    console.log(products);
+    // Writing the result to a JSON file
+    fs_1.default.writeFileSync("result.json", JSON.stringify(products));
     yield browser.close();
 }))();
