@@ -1,10 +1,20 @@
 {
-  "compilerOptions": {
-    "module": "commonjs",
-    "esModuleInterop": true,
-    "target": "es6",
-    "outDir": "dist",
-    "strict": true
+  "ts-node": {
+    "transpileOnly": true,
+    "compilerOptions": {
+      "module": "ESNext",
+      "esModuleInterop": true
+    },
+    "esm": true
   },
-  "include": ["src"]
+  "compilerOptions": {
+    "module": "nodenext",
+    "esModuleInterop": true,
+    "target": "ESNext",
+    "outDir": "dist",
+    "strict": true,
+    "allowImportingTsExtensions":true,
+    "noEmit": true
+  },
+  "include": ["src", "src/task1.ts"]
 }

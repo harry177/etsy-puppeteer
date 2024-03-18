@@ -15,8 +15,9 @@ import puppeteer from "puppeteer";
     }
   });
 
-  await page.goto("https://www.etsy.com/", {
-    waitUntil: "networkidle0",
+  await page.goto("https://www.etsy.com/featured/hub/best-home-deals", {
+    timeout: 0,
+    waitUntil: "domcontentloaded",
   });
 
   // Starting the product search process
@@ -59,7 +60,13 @@ import puppeteer from "puppeteer";
   console.log(products);
 
   // Writing the result to a JSON file
-  fs.writeFileSync("result.json", JSON.stringify(products));
+  const existingData = fs.existsSync("result.json")
+    ? JSON.parse(fs.readFileSync("result.json", "utf8"))
+    : { task1: [] }; // Create task1 property if it doesn't exist
+
+  existingData.task1 = products;
+
+  fs.writeFileSync("result.json", JSON.stringify(existingData));
 
   await browser.close();
 })();
