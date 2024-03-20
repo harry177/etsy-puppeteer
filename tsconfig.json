@@ -16,5 +16,5 @@
     "allowImportingTsExtensions":true,
     "noEmit": true
   },
-  "include": ["src", "src/task1.ts"]
+  "include": ["src", "src/part1.ts"]
 }
