@@ -1,5 +1,6 @@
 import fs from "fs";
 import puppeteer from "puppeteer";
+import { requestLimitation } from "./helpers/requestLimitation.ts";
 
 interface ProductProps {
   title: string | null;
@@ -20,14 +21,7 @@ const processTask = async (task: {
   const page = await browser.newPage();
 
   // Limit requests
-  await page.setRequestInterception(true);
-  page.on("request", async (request) => {
-    if (request.resourceType() == "image") {
-      await request.abort();
-    } else {
-      await request.continue();
-    }
-  });
+  requestLimitation(page)
 
   let retries = 0; // Retries counter
 

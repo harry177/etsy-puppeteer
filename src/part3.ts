@@ -1,19 +1,14 @@
 import fs from "fs";
 import puppeteer from "puppeteer";
+import { requestLimitation } from "./helpers/requestLimitation.ts";
+import { captchaDetector } from "./helpers/captchaDetector.ts";
 
 const starter = async () => {
   const browser = await puppeteer.launch({ headless: false });
   const page = await browser.newPage();
 
   // Limit requests
-  await page.setRequestInterception(true);
-  page.on("request", async (request) => {
-    if (request.resourceType() == "image") {
-      await request.abort();
-    } else {
-      await request.continue();
-    }
-  });
+  requestLimitation(page);
 
   let captchaDetected = false; // Captcha marker
 
@@ -24,12 +19,7 @@ const starter = async () => {
     });
 
     // Checking if it is a captcha page
-    const iframes = await page.$$("body > iframe");
-    if (iframes.length === 1) {
-      console.log("Captcha detected. Retrying...");
-    } else {
-      captchaDetected = true;
-    }
+    captchaDetected = await captchaDetector(page, captchaDetected);
   }
 
     // Getting the product title
